@@ -1,0 +1,12 @@
+"SELECT COUNT(mano_preflop) AS num_jugadas,mano_preflop "+
+"FROM Preflop "+
+"WHERE id_jugador='doyle' AND apuesta1_preflop='call' "+
+"GROUP BY mano_preflop "+
+"ORDER BY num_jugadas DESC"
+
+
+SELECT COUNT(mano_preflop) AS num_jugadas,mano_preflop
+ FROM Preflop 
+ WHERE id_jugador='doyle' AND apuesta1_preflop='call'
+ GROUP BY mano_preflop 
+ ORDER BY num_jugadas DESC

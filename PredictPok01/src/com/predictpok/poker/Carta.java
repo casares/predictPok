@@ -1,6 +1,10 @@
 package com.predictpok.poker;
 
 public class Carta {
+/*
+ * valor=2,3,4,5,6,7,8,9,10,11,12,13,14(AS)
+ * palo=d(diamantes), c(corazones), t(treboles), p(picas)	
+ */
 	private int valor;
 	private String palo;
 	
