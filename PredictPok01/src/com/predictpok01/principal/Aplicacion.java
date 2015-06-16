@@ -43,9 +43,8 @@ public class Aplicacion {
 		ArrayList<ManoPreflop> manos =null;
 		try {
 			manos=predic.getMasFrecuentes(3);
-			System.out.println(manos.size());
 			for(int i=0;i<manos.size();i++){
-				System.out.println("Pasada: "+i);
+				if(i==0)System.out.println("Prediccion: "+manos.get(i).toString() );
 				System.out.println(manos.get(i).toString());
 			}
 		} catch (Exception e) {

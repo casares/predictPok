@@ -13,7 +13,6 @@ public class PredictPreflop {
 	//private ManoPreflop prediccion_mano;
 	//String proximo_movimiento;
 	//float fiabilidad_prediccion;
-	ArrayList<ManoPreflop> tres_mas_probables;
 	//ArrayList<ManoPreflop> rango_manos;
 	//ArrayList<ManoPreflop> nunca_jugadas;
 	private int totalJugadas(String jugador, String posicion, String[] apuestas) throws SQLException{
@@ -34,8 +33,6 @@ public class PredictPreflop {
 	}
 	
 	private ResultSet frecuenciaJugadas(String jugador, String posicion, String[] apuestas){
-		ControlDB database=new ControlDB();
-		database.conectar();
 		String query="SELECT COUNT(mano_preflop) AS frecuencia, mano_preflop "
 				   + "FROM preflop "
 				   + "WHERE id_jugador='"+jugador+"'";
@@ -50,7 +47,7 @@ public class PredictPreflop {
 		
 		return result;
 	}
-		
+	
 	public PredictPreflop(String jugador, String posicion, String[] apuestas) throws SQLException{
 		database.conectar();
 		this.jugador=jugador;
@@ -63,16 +60,10 @@ public class PredictPreflop {
 		this.database.desconectar();
 	}
 	
-	public int getTotalJugadas(){
-		return this.total_jugadas;
-	}
-	public ResultSet getFrecuencias(){
-		return frecuencias;
-	}
-	public ArrayList<ManoPreflop> getMasFrecuentes(int primeras) throws Exception{
-		ArrayList<ManoPreflop> tres_mejores = new ArrayList<ManoPreflop>();
+	public int size() throws SQLException{
+		this.frecuencias.first();
 		int numero_filas=0;
-		try {//contamos el numero de filas del resultado
+		try {//contamos el numero de filas del resultado	
 			while(this.frecuencias.next()){
 				numero_filas++;
 				System.out.println("Numero de filas: "+numero_filas);
@@ -82,15 +73,62 @@ public class PredictPreflop {
 			e.printStackTrace();
 		}
 		this.frecuencias.first();
-		if(numero_filas<primeras) throw new Exception("No such info");
+		return numero_filas;
+	}
+	
+	public int getTotalJugadas(){
+		return this.total_jugadas;
+	}
+	public ResultSet getFrecuencias(){
+		return frecuencias;
+	}
+	public ArrayList<ManoPreflop> getMasFrecuentes(int primeras) throws Exception{
+		ArrayList<ManoPreflop> mejores_manos = new ArrayList<ManoPreflop>();
+		if(size()<primeras) throw new Exception("No such info");
 		for(int i=0; i<primeras;i++){
-			
 			ManoPreflop mano = new ManoPreflop(this.frecuencias.getString("mano_preflop"));
-		
-			tres_mejores.add(mano);
+			mejores_manos.add(mano);
 			this.frecuencias.next();
 		}
-		return tres_mejores;
+		return mejores_manos;
+	}
+	
+	public ManoPreflop getMasFrecuente() throws Exception{
+		return new ManoPreflop(getMasFrecuentes(1).get(0).toString());
+	}
+	
+	public ManoPreflop getMenosFrecuente() throws SQLException, Exception{
+		this.frecuencias.last();
+		ManoPreflop menos_frecuente=new ManoPreflop(this.frecuencias.getString("mano_preflop"));
+		this.frecuencias.first();
+		return menos_frecuente;
+	}
+	
+	public double media() throws SQLException{
+		double media=0.0;
+		int sumatorio=0;
+		this.frecuencias.first();
+		while(this.frecuencias.next()){
+			sumatorio+=Integer.parseInt(this.frecuencias.getString("frecuencia"));
+		}
+		media=sumatorio/size();
+		return media;
+	}
+	
+	public double desviacion() throws SQLException{
+		double desviacion=0.0;
+		double sumatorio=0.0;
+		this.frecuencias.first();
+		while(this.frecuencias.next()){
+			int frecuencia=Integer.parseInt(this.frecuencias.getString("frecuencia"));
+			sumatorio+=Math.pow(frecuencia-media(),2);
+		}
+		desviacion=Math.sqrt(sumatorio/total_jugadas);
+		return desviacion;
+	}
+	
+	public double fiabilidad() throws SQLException{
+		return desviacion();
 	}
 	public String toStringFrecuencias(){
 		String result="";
