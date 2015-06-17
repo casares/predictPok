@@ -65,6 +65,12 @@ public class Aplicacion {
 		System.out.println("Pearson: "+predic.pearson());
 		System.out.println("Oblicuidad: "+predic.oblicuidad());
 		System.out.println(predic.toStringFrecuencias());
+		System.out.println("Mejores Manos");
+		try {
+			System.out.println(predic.getMasFrecuentes(3));
+		} catch (Exception e) {
+			System.out.println("No hay suficiente informacion en la BD");
+		}
 		//System.out.println(predic.media());
 	}
 

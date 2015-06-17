@@ -82,7 +82,7 @@ public class PredictPreflop {
 		return this.apuestas;
 	}
 	public ArrayList<ManoPreflop> getMasFrecuentes(int primeras) throws Exception{
-		ArrayList<ManoPreflop> mejores_manos = new ArrayList<ManoPreflop>();
+		/*ArrayList<ManoPreflop> mejores_manos = new ArrayList<ManoPreflop>();
 		if(numeroFilas()<primeras) throw new Exception("No such info");
 		this.frecuencias.first();
 		for(int i=0; i<primeras;i++){
@@ -90,6 +90,20 @@ public class PredictPreflop {
 			mejores_manos.add(mano);
 			this.frecuencias.next();
 		}
+		return mejores_manos;*/
+		ArrayList<ManoPreflop> mejores_manos = new ArrayList<ManoPreflop>();
+		
+		if(numeroFilas()>=primeras){
+			this.frecuencias.beforeFirst();
+			int elemento_actual=0;
+			while(this.frecuencias.next()){
+				if(elemento_actual<primeras){
+					ManoPreflop mano = new ManoPreflop(this.frecuencias.getString("mano_preflop"));
+					mejores_manos.add(mano);
+					elemento_actual++;
+				}else{break;}
+			}
+		}else{throw new Exception("No such info");}
 		return mejores_manos;
 	}
 	
