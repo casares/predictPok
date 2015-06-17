@@ -10,6 +10,7 @@ public class PredictPreflop {
 	private int total_jugadas;
 	private String[] apuestas;
 	private ResultSet frecuencias;
+	private String posicion;
 	//private ManoPreflop prediccion_mano;
 	//String proximo_movimiento;
 	//float fiabilidad_prediccion;
@@ -50,6 +51,7 @@ public class PredictPreflop {
 		database.conectar();
 		this.jugador=jugador;
 		this.apuestas=apuestas;
+		this.posicion=posicion;
 		this.total_jugadas=totalJugadas(jugador,posicion,apuestas);
 		this.frecuencias=frecuenciaJugadas(jugador,posicion,apuestas);
 	}
@@ -109,6 +111,37 @@ public class PredictPreflop {
 	
 	public ManoPreflop prediccionPreflop () throws Exception{
 		return getMasFrecuente();
+	}
+	
+	public String sigMovimiento() throws SQLException{
+		String query="SELECT apuesta1_preflop,apuesta2_preflop "
+				   + "FROM preflop "
+				   + "WHERE id_jugador='"+this.jugador+"' AND apuesta1_preflop='"+this.apuestas[0]+"'";
+		query+=" AND posicion_preflop='"+this.posicion+"'";
+		System.out.println(query);
+		ResultSet result = database.consultar(query);
+		result.beforeFirst();
+		int numero_calls = 0,numero_raise = 0,numero_fold = 0;
+		while(result.next()){
+			String apuesta=result.getString("apuesta2_preflop");
+			if(apuesta.equals("call"))numero_calls++;
+			if(apuesta.equals("raise"))numero_raise++;
+			if(apuesta.equals("fold"))numero_fold++;
+		}
+		System.out.println(numero_calls);
+		String mayor_frecuencia_apuesta="";
+		int maximo=0;
+		if(numero_calls>maximo){
+			mayor_frecuencia_apuesta="call";
+		}
+		if(numero_raise>maximo){
+			mayor_frecuencia_apuesta="raise";
+		}
+		if(numero_fold>maximo){
+			mayor_frecuencia_apuesta="fold";
+		}
+		
+		return mayor_frecuencia_apuesta;
 	}
 	
 	public double media() throws SQLException{
