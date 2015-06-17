@@ -104,6 +104,10 @@ public class PredictPreflop {
 		return menos_frecuente;
 	}
 	
+	public ManoPreflop prediccionPreflop () throws Exception{
+		return getMasFrecuente();
+	}
+	
 	public double media() throws SQLException{
 		double media=0.0;
 		int sumatorio=0;
