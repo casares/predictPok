@@ -28,7 +28,6 @@ public class PredictPreflop {
 		ResultSet result=database.consultar(query);
 		if (result.next()) System.out.println("tiene elementos");
 		int resultado=Integer.parseInt(result.getString("num"));
-		
 		return resultado;
 	}
 	
@@ -44,7 +43,6 @@ public class PredictPreflop {
 		query+=" GROUP BY mano_preflop ORDER BY frecuencia DESC";
 		System.out.println(query);
 		ResultSet result = database.consultar(query);
-		
 		return result;
 	}
 	
@@ -60,19 +58,12 @@ public class PredictPreflop {
 		this.database.desconectar();
 	}
 	
-	public int size() throws SQLException{
-		this.frecuencias.first();
+	public int numeroFilas() throws SQLException{
 		int numero_filas=0;
-		try {//contamos el numero de filas del resultado	
-			while(this.frecuencias.next()){
-				numero_filas++;
-				System.out.println("Numero de filas: "+numero_filas);
-			}
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		this.frecuencias.beforeFirst();
+		while(this.frecuencias.next()){
+			numero_filas++;
 		}
-		this.frecuencias.first();
 		return numero_filas;
 	}
 	
@@ -82,9 +73,18 @@ public class PredictPreflop {
 	public ResultSet getFrecuencias(){
 		return frecuencias;
 	}
+	
+	public String getJugador(){
+		return this.jugador;
+	}
+	
+	public String[] getApuestas(){
+		return this.apuestas;
+	}
 	public ArrayList<ManoPreflop> getMasFrecuentes(int primeras) throws Exception{
 		ArrayList<ManoPreflop> mejores_manos = new ArrayList<ManoPreflop>();
-		if(size()<primeras) throw new Exception("No such info");
+		if(numeroFilas()<primeras) throw new Exception("No such info");
+		this.frecuencias.first();
 		for(int i=0; i<primeras;i++){
 			ManoPreflop mano = new ManoPreflop(this.frecuencias.getString("mano_preflop"));
 			mejores_manos.add(mano);
@@ -107,40 +107,57 @@ public class PredictPreflop {
 	public double media() throws SQLException{
 		double media=0.0;
 		int sumatorio=0;
-		this.frecuencias.first();
+		this.frecuencias.beforeFirst();
 		while(this.frecuencias.next()){
 			sumatorio+=Integer.parseInt(this.frecuencias.getString("frecuencia"));
 		}
-		media=sumatorio/size();
+		media=(double)sumatorio/numeroFilas();
 		return media;
 	}
 	
 	public double desviacion() throws SQLException{
 		double desviacion=0.0;
 		double sumatorio=0.0;
-		this.frecuencias.first();
+		double media=this.media();
+		int frecuencia=0;
+		this.frecuencias.beforeFirst();;
 		while(this.frecuencias.next()){
-			int frecuencia=Integer.parseInt(this.frecuencias.getString("frecuencia"));
-			sumatorio+=Math.pow(frecuencia-media(),2);
+			frecuencia=Integer.parseInt(this.frecuencias.getString("frecuencia"));
+			double sumando=Math.pow((double)frecuencia-media,2);
+			sumatorio+=sumando;
 		}
-		desviacion=Math.sqrt(sumatorio/total_jugadas);
+		desviacion=Math.sqrt(sumatorio/(double)this.numeroFilas());
 		return desviacion;
 	}
 	
-	public double fiabilidad() throws SQLException{
-		return desviacion();
+	public double pearson() throws SQLException{
+		double desviacion=this.desviacion();
+		double media=this.media();
+		double pearson=desviacion/media*100;
+		return pearson;
 	}
-	public String toStringFrecuencias(){
+	
+	public double oblicuidad() throws SQLException{
+		double desviacion=this.desviacion();
+		double sumatorio=0.0;
+		double media=this.media();
+		int frecuencia=0;
+		this.frecuencias.beforeFirst();;
+		while(this.frecuencias.next()){
+			frecuencia=Integer.parseInt(this.frecuencias.getString("frecuencia"));
+			double sumando=Math.pow(((double)frecuencia-media)/desviacion,3);
+			sumatorio+=sumando;
+		}
+		double oblicuidad=sumatorio/(double)this.numeroFilas();
+		return oblicuidad;
+	}
+	
+	public String toStringFrecuencias() throws SQLException{
 		String result="";
-		try {
-			while(this.frecuencias.next()){
-				result+=this.frecuencias.getString("frecuencia")+" - "
-						+this.frecuencias.getString("mano_preflop")+"\n";
-			}
-			this.frecuencias.first();
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		this.frecuencias.beforeFirst();
+		while(this.frecuencias.next()){
+			result+=this.frecuencias.getString("frecuencia")+" - "
+					+this.frecuencias.getString("mano_preflop")+"\n";
 		}
 		return result;
 	}
